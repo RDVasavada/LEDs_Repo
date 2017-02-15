@@ -7,10 +7,14 @@
 
 #define PIN 6
 
-//   NEO_KHZ800  800 KHz bitstream
-//   NEO_GRB     Pixels are wired for GRB bitstream
+// NEO_KHZ800  800 KHz bitstream
+// NEO_GRB     Pixels are wired for GRB bitstream
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(150, PIN, NEO_GRB + NEO_KHZ800);
+
+const int STRIP_LENGTH = 150;
+const int FLASH_DELAY = 300;
+const int SNAKE_DELAY = 20;
 
 // Rainbow RGB values
 int rainbowCount = 0;
@@ -18,16 +22,16 @@ float rainbowRed;
 float rainbowGreen;
 float rainbowBlue;
 
-int state = 4;
+int state = 2;
 
 // Values for Joshua's rainbows
-long n = 0L;
+double n = 0;
 char add = 'g';
 char sub = 'r';
-long r = 127L;
-long g = 0L;
-long b = 0L;
-long i = 0L;
+double r = 127;
+double g = 0;
+double b = 0;
+double i = 0;
 long t = 0L;
 bool tStop = false;
 
@@ -46,22 +50,25 @@ int findState() {
     returnValue += 1;
   }
 
-  if (returnValue == 0) {
-    secondValue = 0;
-  } else if (returnValue == 1) {
-    secondValue = 1;
-  } else if (returnValue == 10) {
-    secondValue = 2;
-  } else if (returnValue == 11) {
-    secondValue = 3;
-  } else if (returnValue == 100) {
-    secondValue = 4;
-  } else if (returnValue == 101) {
-    secondValue = 5;
-  } else if (returnValue == 110) {
-    secondValue = 6;
-  } else if (returnValue == 111) {
-    secondValue = 7;
+  switch (returnValue) {
+    case 0:
+      secondValue = 0;
+    case 1:
+      secondValue = 1;
+    case 10:
+      secondValue = 2;
+    case 11:
+      secondValue = 3;
+    case 100:
+      secondValue = 4;
+    case 101:
+      secondValue = 5;
+    case 110:
+      secondValue = 6;
+    case 111:
+      secondValue = 7;
+    default:
+      secondValue = 0;
   }
 
   return secondValue;
@@ -80,7 +87,7 @@ void loop() {
     int x = 0;
 
     // Sets the LEDs to a cyber pink color of fluctuating intensity
-    for (int i = 0; i < 150; i++) {
+    for (int i = 0; i < STRIP_LENGTH; i++) {
       strip.setPixelColor((i), ((exp(sin((millis() + x) / 2000.0 * (PI / 1.5))) - 0.36787944) * 41) + 10, 0, (((exp(sin((millis() + x) / 2000.0 * (PI / 1.5))) - 0.36787944) * 20) + 10));
       x += 1;
     }
@@ -89,37 +96,10 @@ void loop() {
   } else if (state == 1) { // Cyber snake and flash
 
     // Creates a snake of length 1
-    for (int i = 0; i < 150; i++) {
-      strip.setPixelColor((i), 51, 1, 30);
-      strip.setPixelColor((i - 1), 0, 0, 0);
-      delay(20);
-      strip.show();
-    }
-
-    for (int i = 149; i  >= 0; i--) {
-      strip.setPixelColor((i), 51, 4, 30);
-      strip.setPixelColor((i + 1), 0, 0, 0);
-      delay(20);
-      strip.show();
-    }
+    colorSnake(51, 4, 30);
 
     // Flashes the LED set
-    for (int i = 0; i < 4; i++) {
-
-      for (int i = 0; i < 150; i++) {
-        strip.setPixelColor((i), 51, 4, 30);
-      }
-      strip.show();
-
-      delay(300);
-
-      for (int i = 0; i < 150; i++) {
-        strip.setPixelColor((i), 0, 0, 0);
-      }
-      strip.show();
-
-      delay(300);
-    }
+    colorFlash(51, 4, 30);
 
   } else if (state == 2) { // Rainbow snake and flash
 
@@ -132,7 +112,7 @@ void loop() {
 
     // Sets the LEDs to a green color of fluctuating intensity
     float x = 0;
-    for (int i = 0; i < 150; i++) {
+    for (int i = 0; i < STRIP_LENGTH; i++) {
       strip.setPixelColor((i), 0, ((exp(sin((millis() + x) / 2000.0 * (PI / 1.5))) - 0.36787944) * 60) + 10, 0);
       x += 100;
     }
@@ -150,7 +130,7 @@ void loop() {
 
     // Sets the LEDs to a red color of fluctuating intensity
     float x = 0;
-    for (int i = 0; i < 150; i++) {
+    for (int i = 0; i < STRIP_LENGTH; i++) {
       strip.setPixelColor((i), ((exp(sin((millis() + x) / 2000.0 * (PI / 1.5))) - 0.36787944) * 60) + 10, 0, 0);
       x += 100;
     }
@@ -160,44 +140,49 @@ void loop() {
 
     // Sets the LEDs to a blue color of fluctuating intensity
     float x = 0;
-    for (int i = 0; i < 150; i++) {
+    for (int i = 0; i < STRIP_LENGTH; i++) {
       strip.setPixelColor((i), (0, 0, (exp(sin((millis() + x) / 2000.0 * (PI / 1.5))) - 0.36787944) * 60) + 10);
       x += 100;
     }
     strip.show();
 
+  } else if (state == 8) { // Solud color test state
+    for (int i = 0; i < STRIP_LENGTH; i++) {
+      strip.setPixelColor((i), 51, 51, 51);
+    }
+    strip.show();
   }
 
 }
 
 
 void rainbowSnake() {
-  for (int i = 0; i < 150; i++) {
+  for (int i = 0; i < STRIP_LENGTH; i++) {
     rainbowCount += 5;
     rainbowRed = sin(radians(rainbowCount)) * 128 + 127;
     rainbowGreen = sin(radians(rainbowCount + 120)) * 128 + 127;
     rainbowBlue = sin(radians(rainbowCount + 240)) * 128 + 127;
     strip.setPixelColor((i), rainbowRed, rainbowGreen, rainbowBlue);
     strip.setPixelColor((i - 1), 0, 0, 0);
-    delay(20);
+    delay(SNAKE_DELAY);
     strip.show();
   }
 
-  for (int i = 149; i  >= 0; i--) {
+  for (int i = STRIP_LENGTH - 1; i  >= 0; i--) {
     rainbowCount += 5;
     rainbowRed = sin(radians(rainbowCount)) * 128 + 127;
     rainbowGreen = sin(radians(rainbowCount + 120)) * 128 + 127;
     rainbowBlue = sin(radians(rainbowCount + 240)) * 128 + 127;
     strip.setPixelColor((i), rainbowRed, rainbowGreen, rainbowBlue);
     strip.setPixelColor((i + 1), 0, 0, 0);
-    delay(20);
+    delay(SNAKE_DELAY);
     strip.show();
   }
 }
 
 void rainbowFlash() {
   for (int i = 0; i < 4; i++) {
-    for (int i = 0; i < 150; i++) {
+    for (int i = 0; i < STRIP_LENGTH; i++) {
       rainbowCount += 20;
       rainbowRed = sin(radians(rainbowCount)) * 128 + 127;
       rainbowGreen = sin(radians(rainbowCount + 120)) * 128 + 127;
@@ -206,14 +191,48 @@ void rainbowFlash() {
     }
     strip.show();
 
-    delay(300);
+    delay(FLASH_DELAY);
 
-    for (int i = 0; i < 150; i++) {
+    for (int i = 0; i < STRIP_LENGTH; i++) {
       strip.setPixelColor((i), 0, 0, 0);
     }
     strip.show();
 
-    delay(300);
+    delay(FLASH_DELAY);
+  }
+}
+
+void colorSnake(float r, float g, float b) {
+  for (int i = 0; i < STRIP_LENGTH; i++) {
+    strip.setPixelColor((i), r, g, b);
+    strip.setPixelColor((i - 1), 0, 0, 0);
+    delay(SNAKE_DELAY);
+    strip.show();
+  }
+
+  for (int i = STRIP_LENGTH - 1; i  >= 0; i--) {
+    strip.setPixelColor((i), r, g, b);
+    strip.setPixelColor((i + 1), 0, 0, 0);
+    delay(SNAKE_DELAY);
+    strip.show();
+  }
+}
+
+void colorFlash(float r, float g, float b) {
+  for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < STRIP_LENGTH; i++) {
+      strip.setPixelColor((i), r, g, b);
+    }
+    strip.show();
+
+    delay(FLASH_DELAY);
+
+    for (int i = 0; i < STRIP_LENGTH; i++) {
+      strip.setPixelColor((i), 0, 0, 0);
+    }
+    strip.show();
+
+    delay(FLASH_DELAY);
   }
 }
 
@@ -243,7 +262,7 @@ void joshuaRainbow() {
     sub = 'b';
   }
 
-  if (i < 150 and tStop == false) {
+  if (i < STRIP_LENGTH and tStop == false) {
     strip.setPixelColor(i, r, g, b);
     i++;
   } else {
@@ -275,7 +294,7 @@ void flashSet() {
 }
 
 void flash() {
-  for (int i = 0; i < 150; i++) {
+  for (int i = 0; i < STRIP_LENGTH; i++) {
     strip.setPixelColor(i, r, g, b);
   }
 }
