@@ -8,7 +8,9 @@
 #define PIN 6
 
 // NEO_KHZ800  800 KHz bitstream
-// NEO_GRB     Pixels are wired for GRB bitstream
+// NEO_GRB  Pixels are wired for GRB bitstream
+// 190 inches of LEDs
+// 1.26 inches per LED
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(150, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -70,8 +72,8 @@ int findState() {
     default:
       secondValue = 0;
   }
-
   return secondValue;
+  // return int(digitalRead(10)) * 4 + int(digitalRead(9))*2 + int(digitalRead(8));
 }
 
 void setup() {
